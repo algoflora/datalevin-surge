@@ -1,6 +1,6 @@
-(defproject io.github.algoflora/dtlv-surge "0.1.0"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+(defproject io.github.algoflora/datalevin-surge "0.1.0"
+  :description "Datalevin database migrations plugin for Leiningen"
+  :url "https://github.com/datalevin-surge"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :eval-in-leiningen true

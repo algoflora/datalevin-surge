@@ -1,7 +1,6 @@
-(ns leiningen.dtlv-surge
-  (:require [leiningen.dtlv-surge.init :as init]))
+(ns datalevin-surge.core)
 
-(defn- dispatch-category
+(defn dispatch-category
   [args]
   (let [category  (first args)
         command   (second args)
@@ -12,10 +11,3 @@
       (nil? category) (println "Empty category. See 'dtlv-surge help'.")
       
       :else (println (format "'%s' is not a category. See 'dtlv-surge help'." category)))))
-
-(defn dtlv-surge
-  
-  "I don't do a lot."
-
-  [project & args]
-  (println "Hi!"))

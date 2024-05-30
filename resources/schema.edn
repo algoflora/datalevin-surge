@@ -5,10 +5,7 @@
             
             :uri  {:db/valueType :db.type/string
                    :db/cardinality :db.cardinality/one
-                   :db/doc "URI of Datalevin connection"}
-
-            :opts {:db/cardinality :db.cardinality/one
-                   :db/doc "Client options for this profile"}}
+                   :db/doc "URI of Datalevin connection"}}
 
  #:migration {:uuid      {:db/valueType :db.type/uuid
                           :db/cardinality :db.cardinality/one

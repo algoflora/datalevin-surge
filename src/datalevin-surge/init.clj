@@ -1,8 +1,8 @@
-(ns leiningen.dtlv-surge.init
-  (:require [datalevin.core :as d]
-            [clojure.java.io :as io]
+(ns datalevin-surge.init
+  (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [leiningen.dtlv-surge.confis :as conf]))
+            [datalevin-surge.config :as conf]
+            [datalevin-surge.clear :as clear]))
 
 (defn- check-initialization
   []
@@ -49,9 +49,9 @@
             (do (println "Wrong input!")
                 (recur))))))))
 
-(defn- confirm-options!
+(defn- ask-approve!
   [pid puri]
-  (print (format "Do you want to initialize dtlv-surge in current folder with initial profile '%s' for database '%s'? (y/n) [y]: " pid puri))
+  (print (format "Do you want to initialize dtlv-surge in current folder with initial profile '%s' for database '%s'? (Y/n): " pid puri))
   (loop [in (read-line)]  
     (cond (= "y" in) true
           (= "n" in) false
@@ -62,17 +62,18 @@
   (loop []
     (let [pid  (ask-profile-id!)
           puri (ask-profile-uri!)]
-      (if (true? confirm-options!)
+      (if (true? ask-approve!)
         [pid puri]
         (recur)))))
 
 (defn- initialize
   []
   (let [[pid puri] (ask-options)]
-    ))
+    (clear/main true)
+    (d/get-conn )))
 
 (defn main
   []
   (if (check-initialization)
-    (println "Looks like dtlv-surge is already initialized in this folder. Use 'dtlv-surge check' to check consistency or 'dtlv-surge clear' to clear all dtlv-surge data.")
+    (println "Looks like Datalevin Surge is already initialized in this folder. Use 'dtlv-surge check' to check consistency or 'dtlv-surge clear' to clear all dtlv-surge data.")
     (initialize)))
