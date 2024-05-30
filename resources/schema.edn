@@ -1,0 +1,24 @@
+[#:profile {:id   {:db/valueType :db.type/keyword
+                   :db/cardinality :db.cardinality/one
+                   :db/unique :db.unique/identity
+                   :db/doc "Unique identifier of profile e.g. :dev, :prod..."}
+            
+            :uri  {:db/valueType :db.type/string
+                   :db/cardinality :db.cardinality/one
+                   :db/doc "URI of Datalevin connection"}
+
+            :opts {:db/cardinality :db.cardinality/one
+                   :db/doc "Client options for this profile"}}
+
+ #:migration {:uuid      {:db/valueType :db.type/uuid
+                          :db/cardinality :db.cardinality/one
+                          :db/unique :db.unique/identity
+                          :db/doc "UUID of migration used"}
+              
+              :timestamp {:db/valueType :db.type/instant
+                          :db/cardinality :db.cardinality/one
+                          :db/doc "Timestamp of using migration"}
+              
+              :profile   {:db/valueType :db.type/ref
+                          :db/cardinality :db.cardinality/one
+                          :db/doc "Profile migration used on"}}]
