@@ -5,5 +5,5 @@
   
   "I don't do a lot."
 
-  [project & args]
-  (dispatch-category))
+  [_ & args]
+  (dispatch-category args))

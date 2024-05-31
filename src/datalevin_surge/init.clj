@@ -1,8 +1,9 @@
 (ns datalevin-surge.init
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]
             [datalevin-surge.config :as conf]
-            [datalevin-surge.clear :as clear]))
+            [datalevin-surge.clear :as clear]
+            [datalevin-surge.databases :as db]
+            [datalevin-surge.profile :as prof]))
 
 (defn- check-initialization
   []
@@ -13,9 +14,9 @@
       (and (.exists db)
            (.exists fs)
            (.isDirectory db)
-           (.isDirectory fs))
-      (catch Exception _
-        false))))
+           (.isDirectory fs)))
+    (catch Exception _
+      false)))
 
 (defn- ask-profile-id!
   []
@@ -55,7 +56,7 @@
   (loop [in (read-line)]  
     (cond (= "y" in) true
           (= "n" in) false
-          :else (recur))))
+          :else (recur (read-line)))))
 
 (defn- ask-options
   []
@@ -70,10 +71,12 @@
   []
   (let [[pid puri] (ask-options)]
     (clear/main true)
-    (d/get-conn )))
+    (db/surge-connection)
+    (prof/new pid puri)
+    (println (format "Created profile %s with connection URI %s" pid puri))))
 
 (defn main
   []
   (if (check-initialization)
-    (println "Looks like Datalevin Surge is already initialized in this folder. Use 'dtlv-surge check' to check consistency or 'dtlv-surge clear' to clear all dtlv-surge data.")
+    (println "Looks like Datalevin Surge is already initialized in this folder. Use 'surge check' to check consistency or 'surge clear' to clear all Datalevin Surge data.")
     (initialize)))

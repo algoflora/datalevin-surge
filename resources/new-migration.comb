@@ -1,0 +1,29 @@
+;;; Datalevin Surge migration
+
+;;; <%= name %>
+
+;;; Project: <%= project-name %>
+
+;;; I'am doing nothing FIXME 
+
+;;; Initialy created: <%= created-on %>
+
+{:uuid <%= uuid %> ; DO NOT EDIT!
+
+ :parent <%= parent %> ; 
+
+ :up {:stage-fn nil
+
+      :schema-remove nil
+
+      :schema-insert nil
+
+      :unstage-fn nil}
+
+ :down {:stage-fn nil
+
+        :schema-remove nil
+
+        :schema-insert nil
+
+        :unstage-fn nil}}

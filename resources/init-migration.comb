@@ -1,0 +1,18 @@
+;;; Datalevin Surge migration
+;;;
+;;;   Initial migration
+;;;
+;;;   Project: <%= project-name %>
+;;;
+;;;   Automatically created initial schema migration
+;;;
+;;;   Initialy created: <%= created-on %>
+
+{:uuid <%= uuid %> ; DO NOT EDIT!
+
+ :parent nil
+
+ :up {:schema-insert <%= schema %>}
+
+ :down {:schema-remove nil}}
+ 

@@ -7,11 +7,15 @@ pom.xml.asc
 *.jar
 *.class
 /.lein-*
+.lein-failures
 /.nrepl-port
 /.prepl-port
 .hgignore
 .hg/
+.clj-kondo
+.lsp
 
+.emacs.desktop*
 *~
 \#*#
 .#
