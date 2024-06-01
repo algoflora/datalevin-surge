@@ -1,9 +1,11 @@
 (ns leiningen.surge
-  (:require [datalevin-surge.core :refer [dispatch-category]]))
+  (:require [datalevin-surge.core :refer [dispatch-category]]
+            [datalevin-surge.vars :refer [*project*]]))
 
 (defn surge
   
   "I don't do a lot."
 
-  [_ & args]
-  (dispatch-category args))
+  [project & args]
+  (binding [*project* project]
+    (dispatch-category args)))

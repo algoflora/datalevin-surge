@@ -9,4 +9,7 @@
              "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"]
   
   :dependencies [[datalevin "0.9.5"]
-                 [comb "0.1.1"]])
+                 [comb "0.1.1"]]
+
+  :profiles {:repl {:jvm-opts ["--add-opens=java.base/java.nio=ALL-UNNAMED"
+                               "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"]}})

@@ -1,6 +1,6 @@
 ;;; Datalevin Surge migration
 ;;;
-;;;   Initial migration
+;;;   <%= migration-name %>
 ;;;
 ;;;   Project: <%= project-name %>
 ;;;
@@ -14,5 +14,5 @@
 
  :up {:schema-insert <%= schema %>}
 
- :down {:schema-remove nil}}
+ :down {:schema-remove <%= attributes %>}}
  

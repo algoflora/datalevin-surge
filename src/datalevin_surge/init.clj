@@ -73,7 +73,8 @@
     (clear/main true)
     (db/surge-connection)
     (prof/new pid puri)
-    (println (format "Created profile %s with connection URI %s" pid puri))))
+    (println (format "Created profile %s with connection URI %s" pid puri))
+    ))
 
 (defn main
   []
