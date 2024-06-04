@@ -1,5 +1,6 @@
 (ns datalevin-surge.clear
-  (:require [datalevin-surge.config :asn conf]))
+  (:require [datalevin-surge.config :as conf]
+            [clojure.java.io :as io]))
 
 (defn- del-dir-rec
   "Recursively delete a directory."
@@ -25,4 +26,4 @@
        (println "Clearing database files..."))
      (del-dir-rec conf/database-dir)
      (when-not silent?
-       (prinltn "Datalevin Surge data clearing complete.")))))
+       (println "Datalevin Surge data clearing complete.")))))

@@ -50,6 +50,8 @@
 
 (defn create-initial
   [uri]
-  (spit (create-filename 0 initial-migration-name)
-        (compose-initial uri)))
+  (let [filename (create-filename 0 initial-migration-name)
+        path     (format "%s/%s" conf/migrations-dir filename)]
+    (spit path (compose-initial uri))
+    (println (format "\"%s\" migration created in file %s" initial-migration-name path))))
 
