@@ -7,9 +7,7 @@
             [comb.template :as template]
             [clojure.java.io :as io]))
 
-(def initial-migration-name "Initial migration")
-
-(declare migrations)
+(def ^:private initial-migration-name "Initial migration")
 
 (defn- pprn-str
   [obj]
@@ -55,3 +53,39 @@
     (spit path (compose-initial uri))
     (println (format "\"%s\" migration created in file %s" initial-migration-name path))))
 
+(defn sort-migrations
+  [migrations]
+  (loop [ms  migrations
+         acc '()]
+    (if (empty? acc)
+      (let [inits (filter #(nil? (:parent %)) ms)]
+        (if (= 1 (count inits))
+          (let [init (first inits)]
+            (recur (filter #(not= init %) ms)
+                   (conj acc init)))
+          (throw (ex-info "Wrong count of initial migration files!"
+                          {:count (count inits)
+                           :files (map :filename inits)}))))
+      (let [last  (first acc)
+            nexts (filter #(= (:parent %) (:uuid last)) ms)
+            cnt   (count nexts)]
+        (cond (= 0 cnt) acc
+              (< 1 cnt) (throw (ex-info "Several migration files with same :parent!"
+                                        {:count cnt
+                                         :files (map :filename nexts)}))
+              :else (let [next (first nexts)]
+                      (recur (filter #(not= next %) ms)
+                             (conj acc next))))))))
+
+(def raw-local-migrations
+  (->> conf/migrations-dir
+       io/file
+       file-seq
+       (filter #(-> % .toPath .getFileName str (str/ends-with? ".edn")))
+       (filter .isFile)
+       (map #(-> % slurp read-string (assoc :filename (-> % .toPath .getFileName))))))
+
+(def sorted-local-migrations (sort-migrations (raw-local-migrations)))
+
+(defn remote-migrations-list
+  [uri])

@@ -11,7 +11,5 @@
   :plugins [[lein-eftest "0.6.0"]]
   
   :dependencies [[datalevin "0.9.5"]
-                 [comb "0.1.1"]]
-
-  :test-paths ["test" "datalevin_surge"])
+                 [comb "0.1.1"]])
 

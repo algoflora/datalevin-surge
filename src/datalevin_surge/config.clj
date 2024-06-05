@@ -1,8 +1,6 @@
 (ns datalevin-surge.config
-  (:require [clojure.java.io :as io]))
+  (:require [datalevin-surge.vars :refer [*project*]]))
 
-(def database-dir "./.dtlv-surge")
-
-(def database-schema (->> "schema.edn" io/resource slurp read-string (reduce merge {})))
-
-(def migrations-dir "./dtlv-surge")
+(defn migrations-dir
+  []
+  (or (-> *project* :datalevin-surge :migrations-dir) "./resources/migrations"))
