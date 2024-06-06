@@ -1,5 +1,5 @@
 (ns datalevin-surge.migration
-  (:require [datalevin-surge.databases :as db]
+  (:require [datalevin-surge.database :as db]
             [datalevin-surge.config :as conf]
             [datalevin-surge.vars :refer [*project*]]
             [clojure.pprint :refer [pprint]]
@@ -24,7 +24,7 @@
 
 (defn- date-str
   []
-  (format-date (java.utils.Date.)))
+  (format-date (java.util.Date.)))
 
 (defn- create-filename
   [num name]
@@ -35,7 +35,7 @@
 
 (defn- compose-initial
   [uri]
-  (let [schema (-> uri db/target-schema pprn-str)
+  (let [schema (-> uri db/remote-schema pprn-str)
         pname  (:name *project*)
         time   (date-str)
         uuid   (java.util.UUID/randomUUID)]
@@ -77,15 +77,18 @@
                       (recur (filter #(not= next %) ms)
                              (conj acc next))))))))
 
-(def raw-local-migrations
-  (->> conf/migrations-dir
+(defn raw-local-migrations
+  []
+  (->> (conf/migrations-dir)
+       io/resource
        io/file
        file-seq
        (filter #(-> % .toPath .getFileName str (str/ends-with? ".edn")))
-       (filter .isFile)
+       (filter #(-> % .toPath .isFile))
        (map #(-> % slurp read-string (assoc :filename (-> % .toPath .getFileName))))))
 
-(def sorted-local-migrations (sort-migrations (raw-local-migrations)))
+;;; TODO: Use delay!!!
+(defn sorted-local-migrations
+  []
+  (sort-migrations (raw-local-migrations)))
 
-(defn remote-migrations-list
-  [uri])

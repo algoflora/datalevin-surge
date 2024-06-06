@@ -1,6 +1,6 @@
 (ns datalevin-surge.config
-  (:require [datalevin-surge.vars :refer [*project*]]))
+  (:require [datalevin-surge.vars :as vars]))
 
 (defn migrations-dir
   []
-  (or (-> *project* :datalevin-surge :migrations-dir) "./resources/migrations"))
+  (or (-> vars/*project* :datalevin-surge :migrations-dir) "./resources/migrations"))

@@ -1,7 +1,7 @@
 (ns datalevin-surge.profile
   (:require [datalevin-surge.vars :refer [*project*]]))
 
-(defn uri
+(defn profile-uri
   [id]
-  (-> *project* :datalevin-surge :profiles id
-      #(if (map? %) (:uri %) %)))
+  (let [p (-> *project* :datalevin-surge :profiles id)]
+    (if (map? p) (:uri p) p)))

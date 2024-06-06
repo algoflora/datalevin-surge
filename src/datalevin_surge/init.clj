@@ -2,9 +2,10 @@
   (:require [clojure.java.io :as io]
             [datalevin-surge.config :as conf]
             [datalevin-surge.clear :as clear]
+            [datalevin-surge.check :as check]
             [datalevin-surge.migration :as mgr]
-            [datalevin-surge.databases :as db]
-            [datalevin-surge.profile :refer [profiles]]))
+            [datalevin-surge.database :as db]
+            [datalevin-surge.profile :refer [profile-uri]]))
 
 (defn- ask-approve!
   [pid puri]
@@ -17,10 +18,10 @@
 (defn- initialize
   [pid]
   (clear/main true)
-  (migr/create-initial (pid profiles)))
+  (mgr/create-initial (profile-uri pid)))
    
-(defn main
+#_(defn main
   [pid]
-  (if (check-initialization)
+  (if (check-initialization pid)
     (println "Looks like Datalevin Surge is already initialized in this folder. Use 'surge check' to check consistency or 'surge clear' to clear all Datalevin Surge data.")
     (initialize pid)))

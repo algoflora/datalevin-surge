@@ -1,7 +1,8 @@
 (ns datalevin-surge.core-test
-  (:require [clojure.test :refer [deftest is testing]])
-  (:gen-class))
+  (:require [clojure.test :refer [deftest is testing]]
+            [leiningen.surge :refer [surge]]
+            [datalevin-surge.vars :refer [*project*]]
+            [datalevin-surge.test-helpers :refer [create-data-query with-test-case]]))
 
-(deftest core-test
-  (testing "Testing..."
-    (is (true? false))))
+(with-test-case :case-1
+  (surge *project* :test "check"))

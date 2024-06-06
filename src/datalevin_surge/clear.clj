@@ -23,7 +23,4 @@
        (println "Clearing migrations files..."))
      (del-dir-rec conf/migrations-dir)
      (when-not silent?
-       (println "Clearing database files..."))
-     (del-dir-rec conf/database-dir)
-     (when-not silent?
        (println "Datalevin Surge data clearing complete.")))))
