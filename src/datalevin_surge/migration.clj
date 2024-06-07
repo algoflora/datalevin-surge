@@ -55,36 +55,37 @@
 
 (defn sort-migrations
   [migrations]
-  (loop [ms  migrations
-         acc '()]
-    (if (empty? acc)
-      (let [inits (filter #(nil? (:parent %)) ms)]
-        (if (= 1 (count inits))
-          (let [init (first inits)]
-            (recur (filter #(not= init %) ms)
-                   (conj acc init)))
-          (throw (ex-info "Wrong count of initial migration files!"
-                          {:count (count inits)
-                           :files (map :filename inits)}))))
-      (let [last  (first acc)
-            nexts (filter #(= (:parent %) (:uuid last)) ms)
-            cnt   (count nexts)]
-        (cond (= 0 cnt) acc
-              (< 1 cnt) (throw (ex-info "Several migration files with same :parent!"
-                                        {:count cnt
-                                         :files (map :filename nexts)}))
-              :else (let [next (first nexts)]
-                      (recur (filter #(not= next %) ms)
-                             (conj acc next))))))))
+  (if (empty? migrations)
+    migrations
+    (loop [ms  migrations
+           acc '()]
+      (if (empty? acc)
+        (let [inits (filter #(nil? (:parent %)) ms)]
+          (if (= 1 (count inits))
+            (let [init (first inits)]
+              (recur (filter #(not= init %) ms)
+                     (conj acc init)))
+            (throw (ex-info "Wrong count of initial migration files!"
+                            {:count (count inits)
+                             :files (map :filename inits)}))))
+        (let [last  (first acc)
+              nexts (filter #(= (:parent %) (:uuid last)) ms)
+              cnt   (count nexts)]
+          (cond (= 0 cnt) acc
+                (< 1 cnt) (throw (ex-info "Several migration files with same :parent!"
+                                          {:count cnt
+                                           :files (map :filename nexts)}))
+                :else (let [next (first nexts)]
+                        (recur (filter #(not= next %) ms)
+                               (conj acc next)))))))))
 
 (defn raw-local-migrations
   []
   (->> (conf/migrations-dir)
-       io/resource
        io/file
        file-seq
        (filter #(-> % .toPath .getFileName str (str/ends-with? ".edn")))
-       (filter #(-> % .toPath .isFile))
+       (filter #(-> % .toPath .toFile .isFile))
        (map #(-> % slurp read-string (assoc :filename (-> % .toPath .getFileName))))))
 
 ;;; TODO: Use delay!!!

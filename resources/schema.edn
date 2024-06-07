@@ -1,5 +1,5 @@
-#:datalevin-surge-migration{:uuid {:db/valueType :db.valueType/uuid
-                                   :db/cardinaliyu :db.cardinality/one
+#:datalevin-surge-migration{:uuid {:db/valueType :db.type/uuid
+                                   :db/cardinality :db.cardinality/one
                                    :db/unique :db.unique/identity
                                    :db/doc "UUID of migration used"}
                             

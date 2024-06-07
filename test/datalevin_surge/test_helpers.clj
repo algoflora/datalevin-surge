@@ -1,7 +1,8 @@
 (ns datalevin-surge.test-helpers
   (:require [clojure.java.io :as io]
             [clojure.test :refer [is deftest]]
-            [datalevin.core :as d]))
+            [datalevin.core :as d]
+            [datalevin-surge.vars :refer [*project*]]))
 
 (def ^:private opts {:validate-data? true :closed-schema? true})
 
@@ -18,17 +19,17 @@
              (format "%s/data.edn")
              io/resource slurp read-string)
 
-        dir (format "%s/migrations/" (name test-case))
+        dir (format "test/resources/%s/migrations/" (name test-case))
         uri (str "/tmp/datalevin-surge-test-" (java.util.UUID/randomUUID))]
 
     `(deftest ~(symbol (str "test-case-" (name test-case)))
        (try (d/with-conn [~'conn ~uri ~init-schema ~opts]
               (d/transact! ~'conn ~init-data))
-            (with-redefs [datalevin-surge.config/migrations-dir (fn [] ~dir)]
-              (binding [datalevin-surge.vars/*project* {:datalevin-surge
-                                                        {:profiles
-                                                         {:test ~uri}}}]
-                ~@body))
+            (binding [datalevin-surge.vars/*project* {:datalevin-surge
+                                                      {:migrations-dir ~dir
+                                                       :profiles
+                                                       {:test ~uri}}}]
+              ~@body)
             (d/with-conn [~'conn ~uri nil ~opts]
               (let [~'schema (d/schema ~'conn)
                     ~'query  (create-data-query ~'schema)]
@@ -37,3 +38,7 @@
                 (when (some? ~exp-data)
                   (is (= ~exp-data (d/q ~'query (d/db ~'conn)))))))
             (finally (#'datalevin-surge.clear/del-dir-rec (io/file ~uri)))))))
+
+(defn test-uri
+  []
+  (-> *project* :datalevin-surge :profiles :test))
