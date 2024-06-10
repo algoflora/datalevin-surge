@@ -15,6 +15,7 @@
   :dependencies [[org.clojure/clojure "1.11.2"]
                  [datalevin "0.9.5"]
                  [comb "0.1.1"]
+                 [tick "0.7.5"]
                  [eftest "0.6.0"]]
 
   :profiles {:test {:resource-paths ["test/resources"]}

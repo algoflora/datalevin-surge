@@ -24,7 +24,8 @@
 
     `(deftest ~(symbol (str "test-case-" (name test-case)))
        (try (d/with-conn [~'conn ~uri ~init-schema ~opts]
-              (d/transact! ~'conn ~init-data))
+              (d/transact! ~'conn ~init-data)
+              (println "DB" (d/q '[:find (~'pull ~'?e [~'*]) :where [~'?e :datalevin-surge-migration/uuid]] (d/db ~'conn))))
             (binding [datalevin-surge.vars/*project* {:datalevin-surge
                                                       {:migrations-dir ~dir
                                                        :profiles

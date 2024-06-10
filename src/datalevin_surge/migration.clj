@@ -60,7 +60,7 @@
     (loop [ms  migrations
            acc '()]
       (if (empty? acc)
-        (let [inits (filter #(nil? (:parent %)) ms)]
+        (let [inits (filter #(and (contains? % :parent) (nil? (:parent %))) ms)]
           (if (= 1 (count inits))
             (let [init (first inits)]
               (recur (filter #(not= init %) ms)
@@ -73,7 +73,7 @@
               cnt   (count nexts)]
           (cond (= 0 cnt) acc
                 (< 1 cnt) (throw (ex-info "Several migration files with same :parent!"
-                                          {:count cnt
+                                          {:count (count nexts)
                                            :files (map :filename nexts)}))
                 :else (let [next (first nexts)]
                         (recur (filter #(not= next %) ms)
@@ -86,10 +86,10 @@
        file-seq
        (filter #(-> % .toPath .getFileName str (str/ends-with? ".edn")))
        (filter #(-> % .toPath .toFile .isFile))
-       (map #(-> % slurp read-string (assoc :filename (-> % .toPath .getFileName))))))
+       (map #(-> % slurp read-string (assoc :filename (-> % .toPath .getFileName str))))))
 
 ;;; TODO: Use delay!!!
 (defn sorted-local-migrations
   []
-  (sort-migrations (raw-local-migrations)))
+  (reverse (sort-migrations (raw-local-migrations))))
 
