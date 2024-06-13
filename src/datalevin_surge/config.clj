@@ -4,3 +4,5 @@
 (defn migrations-dir
   []
   (or (-> vars/*project* :datalevin-surge :migrations-dir) "./resources/migrations"))
+
+(def dbi-name "datalevin-surge")

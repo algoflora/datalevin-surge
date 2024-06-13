@@ -10,7 +10,7 @@
 
   :plugins [[lein-eftest "0.6.0"]]
 
-  ; :main ^:skip-aot datalevin-surge.core
+  :main ^:skip-aot datalevin-surge.core
   
   :dependencies [[org.clojure/clojure "1.11.2"]
                  [datalevin "0.9.5"]

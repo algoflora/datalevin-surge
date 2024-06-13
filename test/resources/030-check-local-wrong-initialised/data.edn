@@ -1,10 +1,2 @@
-{:init-schema
- #:datalevin-surge-migration {:uuid {:db/valueType :db.type/uuid
-                                     :db/cardinality :db.cardinality/one
-                                     :db/unique :db.unique/identity
-                                     :db/doc "UUID of migration used"}
-                              
-                              :timestamp {:db/valueType :db.type/instant
-                                          :db/cardinality :db.cardinality/one
-                                          :db/doc "Timestamp of using migration"}}}
+{:init-kv []}
 

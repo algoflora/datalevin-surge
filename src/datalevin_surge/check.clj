@@ -1,18 +1,12 @@
 (ns datalevin-surge.check
   (:require [datalevin-surge.migration :as mgr]
-            [datalevin.core :as d]
             [datalevin-surge.database :as db]
             [datalevin-surge.config :as conf]
-            [clojure.set :as set]
             [clojure.java.io :as io]))
 
 (defn remote-init?
   [pid]
-  (if (->> #{(db/raw-remote-schema pid) (db/internal-schema)}
-           (map #(-> % keys set))
-           (apply set/intersection)
-           count
-           (= 2))
+  (if (db/dbi-open? pid)
     {:ok true  :message "Remote is initialised"}
     {:ok false :message "Remote is not initialised!"}))
 
@@ -40,15 +34,18 @@
     (catch Exception ex
       {:ok false :message (str (.getMessage ex) "\t" (ex-data ex))})))
 
+(defn spy
+  [x]
+  (println "SPY" x (type x))
+  x)
+
 (defn local-remote-consistent?
   [pid]
   (let [local  (map :uuid (mgr/sorted-local-migrations))
-        remote (->> pid db/remote-connection d/db
-                    (d/q '[:find [(pull ?m [*]) ...]
-                           :where
-                           [?m :datalevin-surge-migration/uuid]])
-                    (sort-by :datalevin-surge-migration/timestamp)
-                    (map :datalevin-surge-migration/uuid))
+        remote (->> (db/read-kv pid)
+                    (into [])
+                    (sort-by second)
+                    (map first))
         lcnt (count local)
         rcnt (count remote)]
     (println lcnt rcnt local remote)
@@ -72,13 +69,14 @@
                          (recur {:ok (and (:ok a) (:ok result))
                                  :messages (conj (:messages a) (:message result))} (rest f))))))
 
+
 (defn process
   [pid print?]
   (check-flow print?
-   #(remote-init? pid)
-   #(local-init?)
-   #(local-consistent?)
-   #(local-remote-consistent? pid)))
+              #(remote-init? pid)
+              #(local-init?)
+              #(local-consistent?)
+              #(local-remote-consistent? pid)))
 
 (defn main
   [pid]

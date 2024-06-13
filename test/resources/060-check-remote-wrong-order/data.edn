@@ -1,19 +1,9 @@
-{:init-schema
- #:datalevin-surge-migration {:uuid {:db/valueType :db.type/uuid
-                                     :db/cardinality :db.cardinality/one
-                                     :db/unique :db.unique/identity
-                                     :db/doc "UUID of migration used"}
-                              
-                              :timestamp {:db/valueType :db.type/instant
-                                          :db/cardinality :db.cardinality/one
-                                          :db/doc "Timestamp of using migration"}}
+{:init-kv 
+ [[#uuid "b01a5cfe-f08a-4e43-a444-7d080f30d739"
+   #inst "2024-06-10T16:53:55.829-00:00"]
 
- :init-data
- [{:datalevin-surge-migration/uuid #uuid "b01a5cfe-f08a-4e43-a444-7d080f30d739"
-   :datalevin-surge-migration/timestamp #inst "2024-06-10T16:53:55.829-00:00"}
+  [#uuid "28d33d4c-8e4b-441e-93c2-b45413bf75af"
+   #inst "2024-06-12T16:53:55.829-00:00"]
 
-  {:datalevin-surge-migration/uuid #uuid "28d33d4c-8e4b-441e-93c2-b45413bf75af"
-   :datalevin-surge-migration/timestamp #inst "2024-06-12T16:53:55.829-00:00"}
-
-  {:datalevin-surge-migration/uuid #uuid "93851f7d-0805-4745-bbc1-384aa1a264ff"
-   :datalevin-surge-migration/timestamp #inst "2024-06-11T16:53:55.829-00:00"}]}
+  [#uuid "93851f7d-0805-4745-bbc1-384aa1a264ff"
+   #inst "2024-06-11T16:53:55.829-00:00"]]}

@@ -34,11 +34,10 @@
       (format "%0,4d-%s.edn" num $)))
 
 (defn- compose-initial
-  [uri]
+  [uri uuid]
   (let [schema (-> uri db/remote-schema pprn-str)
         pname  (:name *project*)
-        time   (date-str)
-        uuid   (java.util.UUID/randomUUID)]
+        time   (date-str)]
     (template/eval (io/resource "init-migration.comb") {:migration-name
                                                         initial-migration-name
                                                         :project-name   pname
@@ -49,9 +48,11 @@
 (defn create-initial
   [uri]
   (let [filename (create-filename 0 initial-migration-name)
-        path     (format "%s/%s" conf/migrations-dir filename)]
-    (spit path (compose-initial uri))
-    (println (format "\"%s\" migration created in file %s" initial-migration-name path))))
+        path     (format "%s/%s" conf/migrations-dir filename)
+        uuid     (java.util.UUID/randomUUID)]
+    (spit path (compose-initial uri uuid))
+    (println (format "\"%s\" migration created in file %s" initial-migration-name path))
+    uuid))
 
 (defn sort-migrations
   [migrations]
