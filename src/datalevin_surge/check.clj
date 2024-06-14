@@ -23,7 +23,7 @@
           1 {:ok true  :message "Migration files are initialised with initial migration"}
           0 {:ok false :message "Migration files are not initialised! Use 'surge <:profile> init' command."}
           {:ok false :message (format "Migration files are initialised wrong! %d initial migration files." n)}))
-      {:ok false :message (format "Folder ./%s does not exist!" (conf/migrations-dir))})))
+      {:ok false :message (format "Folder %s does not exist!" (conf/migrations-dir))})))
 
 (defn local-consistent?
   []
@@ -48,7 +48,6 @@
                     (map first))
         lcnt (count local)
         rcnt (count remote)]
-    (println lcnt rcnt local remote)
     (cond
       (= local remote) {:ok true :message "Migrations and database are consistent"}
       (and (< lcnt rcnt) (= local (take lcnt remote))) {:ok false :message (format "Database is %d migrations ahead. Looks like you have to update your codebase." (- rcnt lcnt))}

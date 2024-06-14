@@ -6,7 +6,8 @@
   ; :eval-in-leiningen true
 
   :jvm-opts ["--add-opens=java.base/java.nio=ALL-UNNAMED"
-             "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"]
+             "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
+             "-XX:-OmitStackTraceInFastThrow"]
 
   :plugins [[lein-eftest "0.6.0"]]
 
@@ -15,9 +16,9 @@
   :dependencies [[org.clojure/clojure "1.11.2"]
                  [datalevin "0.9.5"]
                  [comb "0.1.1"]
-                 [tick "0.7.5"]
-                 [eftest "0.6.0"]]
+                 [tick "0.7.5"]]
 
   :profiles {:test {:resource-paths ["test/resources"]}
-             :repl {:resource-paths ["test/resources"]}})
+             :repl {:resource-paths ["test/resources"]}}
 
+  :eftest {:multithread? false})

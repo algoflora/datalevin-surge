@@ -10,9 +10,10 @@
            (check/process *pid* false))))
 
   (with-test-case :010-check-local-no-folder
-    (is (= {:ok false :messages ["Remote is initialised"
-                                 "Folder ./test/resources/010-check-local-no-folder/migrations/ does not exist!"]}
-           (check/process *pid* false))))
+    (let [result (check/process *pid* false)]
+      (is (false? (:ok result)))
+      (is (= "Remote is initialised" (-> result :messages (get 0))))
+      (is (some? (re-matches #"Folder .+ does not exist!" (-> result :messages (get 1)))))))
 
   (with-test-case :020-check-local-not-initialised
     (is (= {:ok false :messages ["Remote is initialised"

@@ -5,7 +5,9 @@
             [clojure.pprint :refer [pprint]]
             [clojure.string :as str]
             [comb.template :as template]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.edn :as edn]
+            [tick.core :as t]))
 
 (def ^:private initial-migration-name "Initial migration")
 
@@ -15,8 +17,8 @@
 
 (defn- format-date-
   [date pattern]
-  (let [formatter (java.text.SimpleDateFormat. pattern)]
-    (.format formatter date)))
+  (let [formatter (t/formatter pattern)]
+    (t/format formatter (t/zoned-date-time date))))
 
 (defn- format-date
   [date]
@@ -24,7 +26,7 @@
 
 (defn- date-str
   []
-  (format-date (java.util.Date.)))
+  (format-date (t/now)))
 
 (defn- create-filename
   [num name]
@@ -34,23 +36,25 @@
       (format "%0,4d-%s.edn" num $)))
 
 (defn- compose-initial
-  [uri uuid]
-  (let [schema (-> uri db/remote-schema pprn-str)
-        pname  (:name *project*)
-        time   (date-str)]
-    (template/eval (io/resource "init-migration.comb") {:migration-name
-                                                        initial-migration-name
-                                                        :project-name   pname
-                                                        :created-on     time
-                                                        :uuid           uuid
-                                                        :schema         schema})))
+  [pid uuid]
+  (let [schema   (into {} (map (fn [[k v]] [k (dissoc v :db/aid)])) (dissoc (db/remote-schema pid) :db/created-at :db/ident :db/updated-at))
+        pname    (:name *project*)
+        time     (date-str)
+        bindings {:migration-name
+                  initial-migration-name
+                  :project-name   pname
+                  :created-on     time
+                  :uuid           uuid
+                  :schema         (pprn-str schema)
+                  :attributes     (set (keys schema))}]
+    (template/eval (io/resource "init-migration.comb") bindings)))
 
 (defn create-initial
-  [uri]
+  [pid]
   (let [filename (create-filename 0 initial-migration-name)
-        path     (format "%s/%s" conf/migrations-dir filename)
-        uuid     (java.util.UUID/randomUUID)]
-    (spit path (compose-initial uri uuid))
+        path     (format "%s/%s" (conf/migrations-dir) filename)
+        uuid     (random-uuid)]
+    (spit path (compose-initial pid uuid))
     (println (format "\"%s\" migration created in file %s" initial-migration-name path))
     uuid))
 
@@ -87,7 +91,7 @@
        file-seq
        (filter #(-> % .toPath .getFileName str (str/ends-with? ".edn")))
        (filter #(-> % .toPath .toFile .isFile))
-       (map #(-> % slurp read-string (assoc :filename (-> % .toPath .getFileName str))))))
+       (map #(-> % io/reader java.io.PushbackReader. edn/read (assoc :filename (-> % .toPath .getFileName str))))))
 
 ;;; TODO: Use delay!!!
 (defn sorted-local-migrations

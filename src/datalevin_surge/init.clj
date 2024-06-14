@@ -18,7 +18,7 @@
 
 (defn- init-local
   [pid]
-  (let [uuid (mgr/create-initial (profile-uri pid))]
+  (let [uuid (mgr/create-initial pid)]
     (db/write-to-kv pid uuid)))
 
 (defn process

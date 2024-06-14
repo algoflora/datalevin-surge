@@ -12,7 +12,7 @@
 
  :parent nil
 
- :up {:schema-insert <%= schema %>}
+ :up {:schema-update <%= schema %>}
 
  :down {:schema-remove <%= attributes %>}}
  

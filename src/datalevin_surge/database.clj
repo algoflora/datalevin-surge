@@ -25,7 +25,7 @@
 (defn write-to-kv
   [pid uuid]
   (d/open-dbi (kv-connection pid) conf/dbi-name)
-  (d/transact-kv (kv-connection pid) [:put conf/dbi-name uuid (t/inst)] :uuid :instant :nooverwrite))
+  (d/transact-kv (kv-connection pid) [[:put conf/dbi-name uuid (t/now) :uuid :instant #{:nooverwrite}]]))
 
 (defn read-kv
   [pid]
