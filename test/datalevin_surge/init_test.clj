@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [clojure.edn :as edn]
             [tick.core :as t]
+            [datalevin-surge.misc :refer [ask-approve!]]
             [datalevin-surge.init :as init]
             [datalevin-surge.database :as db]
             [datalevin-surge.test-helpers :refer [with-test-case
@@ -13,7 +14,7 @@
                                                   create-uuid
                                                   create-time]]))
 
-(testing "Init command"
+(testing "INIT command"
     (with-test-case :100-init-already-inited
       (is (str/starts-with?
            (with-out-str (init/process *pid*))
@@ -24,7 +25,7 @@
              (with-out-str (init/process *pid*)))))
 
     (with-test-case :120-init-no-remote
-      (with-redefs [init/ask-approve! approve!]
+      (with-redefs [ask-approve! approve!]
         (is (false? (db/dbi-open? *pid*)))
         (doseq [m (mapv #(array-map :act %1 :exp %2)
                                (str/split-lines
@@ -35,8 +36,8 @@
         (is (true? (db/dbi-open? *pid*)))))
 
     (with-test-case :130-init-virgin
-      (with-redefs [init/ask-approve! approve!
-                    random-uuid create-uuid
+      (with-redefs [ask-approve! approve!
+                    random-uuid (create-uuid)
                     t/now (create-time)]
         (is (false? (db/dbi-open? *pid*)))
         (is (empty? (filter #(not (.isDirectory %)) (file-seq *dir*))))

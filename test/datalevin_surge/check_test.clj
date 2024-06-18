@@ -3,7 +3,7 @@
             [datalevin-surge.check :as check]
             [datalevin-surge.test-helpers :refer [with-test-case *pid*]]))
 
-(testing "Check command"
+(testing "CHECK command"
 
   (with-test-case :000-check-remote-not-initialised
     (is (= {:ok false :messages ["Remote is not initialised!"]}

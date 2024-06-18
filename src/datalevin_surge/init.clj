@@ -1,16 +1,9 @@
 (ns datalevin-surge.init
-  (:require [datalevin-surge.check :as check]
+  (:require [datalevin-surge.misc :refer [ask-approve!]]
+            [datalevin-surge.check :as check]
             [datalevin-surge.migration :as mgr]
             [datalevin-surge.database :as db]
             [datalevin-surge.profile :refer [profile-uri]]))
-
-(defn- ask-approve!
-  [prompt]
-  (print prompt)
-  (loop [in (read-line)]
-    (cond (= "y" in) true
-          (= "n" in) false
-          :else (recur (read-line)))))
 
 (defn- init-remote
   [pid]

@@ -25,12 +25,12 @@
 (defn write-to-kv
   [pid uuid]
   (d/open-dbi (kv-connection pid) conf/dbi-name)
-  (d/transact-kv (kv-connection pid) [[:put conf/dbi-name uuid (t/now) :uuid :instant #{:nooverwrite}]]))
+  (d/transact-kv (kv-connection pid) [[:put conf/dbi-name uuid (t/now) :data :data #{:nooverwrite}]]))
 
 (defn read-kv
   [pid]
   (d/open-dbi (kv-connection pid) conf/dbi-name)
-  (d/get-range (kv-connection pid) conf/dbi-name [:all] :uuid :instant))
+  (d/get-range (kv-connection pid) conf/dbi-name [:all] :data :data))
 
 (defn remote-connection
   [pid]
@@ -39,3 +39,16 @@
 (defn remote-schema
   [pid]
   (d/schema (remote-connection pid)))
+
+(defn use!
+  [pid mdata]
+  (declare conn) ; For .clj-kondo calmness...
+  (d/with-transaction [conn (remote-connection pid)]
+    (let [stage (some-> mdata :stage-fn (apply [conn]))]
+      (doseq [del-attr (:schema-remove mdata)]
+        (let [es (d/q '[:find [?e ...]
+                        :in $ ?del-attr
+                        :where [?e ?del-attr]] @conn del-attr)]
+          (d/transact! conn (mapv #(vector :db/retract % del-attr) es))))
+      (d/update-schema conn (:schema-insert mdata) (:schema-remove mdata))
+      (some-> mdata :unstage-fn (apply [conn stage])))))

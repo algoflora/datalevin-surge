@@ -17,11 +17,11 @@
   (println s)
   true)
 
-(defonce ^:private uuids-num (atom 0))
-
 (defn create-uuid
   []
-  (java.util.UUID/fromString (format "00000000-0000-0000-0000-%012d" (swap! uuids-num inc))))
+  (let [uuids-num (atom 0)]
+    (fn []
+      (java.util.UUID/fromString (format "00000000-0000-0000-0000-%012d" (swap! uuids-num inc))))))
 
 (defn create-time
   []
@@ -88,17 +88,17 @@
                      *dir* (clojure.java.io/file ~dir)]
              ~@body)
            (d/with-conn [~'conn ~uri nil ~opts]
-             (let [~'schema (d/schema ~'conn)
+             (let [~'schema (into {} (map (fn [[~'k ~'v]] [~'k (dissoc ~'v :db/aid)])) (dissoc (d/schema ~'conn) :db/created-at :db/ident :db/updated-at))
                    ~'query  (#'datalevin-surge.test-helpers/create-data-query ~'schema)]
                (when (some? ~exp-schema)
                  (is (= ~exp-schema ~'schema)))
                (when (some? ~exp-data)
-                 (is (= ~exp-data (d/q ~'query (d/db ~'conn))))))
+                 (is (= (set ~exp-data) (set (d/q ~'query (d/db ~'conn)))))))
              (when (some? ~exp-kv)
                (let [~'kv-conn (d/open-kv ~uri)]
                  (try
                    (d/open-dbi ~'kv-conn conf/dbi-name)
-                   (is (= ~exp-kv (d/get-range ~'kv-conn conf/dbi-name [:all] :uuid :instant)))
+                   (is (= ~exp-kv (d/get-range ~'kv-conn conf/dbi-name [:all] :data :data)))
                    (finally (d/close-kv ~'kv-conn))))))
            (finally (#'datalevin-surge.clear/del-dir-rec (io/file ~uri))
                     (#'datalevin-surge.clear/del-dir-rec (io/file ~dir))))))))

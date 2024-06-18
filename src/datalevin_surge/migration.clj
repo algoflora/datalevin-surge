@@ -98,3 +98,20 @@
   []
   (reverse (sort-migrations (raw-local-migrations))))
 
+(defn- up
+  [pid]
+  (let [local  (sorted-local-migrations)
+        remote (->> (db/read-kv pid) (into []) (sort-by second))]
+    (cond
+      (= (count local) (count remote))
+      (println "All up migrations are completed!")
+
+      :else (doseq [mig (drop (count remote) local)]
+              (db/use! pid {:up mig})))))
+
+(defn process
+  [pid direction]
+  (case direction
+    :up (up pid)
+    :down nil #_(down pid)
+    :else (throw (ex-info "Wrong direction of migration!" {:direction direction}))))
