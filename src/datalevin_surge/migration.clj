@@ -2,6 +2,7 @@
   (:require [datalevin-surge.database :as db]
             [datalevin-surge.config :as conf]
             [datalevin-surge.vars :refer [*project*]]
+            [datalevin-surge.misc :as misc]
             [clojure.pprint :refer [pprint]]
             [clojure.string :as str]
             [comb.template :as template]
@@ -98,20 +99,21 @@
   []
   (reverse (sort-migrations (raw-local-migrations))))
 
-(defn- up
-  [pid]
+(defn up
+  [pid num]
   (let [local  (sorted-local-migrations)
         remote (->> (db/read-kv pid) (into []) (sort-by second))]
     (cond
       (= (count local) (count remote))
       (println "All up migrations are completed!")
 
-      :else (doseq [mig (drop (count remote) local)]
-              (db/use! pid {:up mig})))))
-
-(defn process
-  [pid direction]
-  (case direction
-    :up (up pid)
-    :down nil #_(down pid)
-    :else (throw (ex-info "Wrong direction of migration!" {:direction direction}))))
+      :else
+      (let [migs (take (if (= :all num) Long/MAX_VALUE num) (drop (count remote) local))]
+        (when (misc/ask-approve! (format "Do you want to apply %d migration(s)? (y/n) " (count migs)))
+          (try
+            (doseq [mig migs]
+              (db/use! pid {:fname (:filename mig)
+                            :muuid (:uuid mig)
+                            :mdata (:up mig)}))
+            (catch Exception ex
+              (println (.getMessage ex)))))))))

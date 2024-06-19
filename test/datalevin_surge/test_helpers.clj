@@ -18,23 +18,25 @@
   true)
 
 (defn create-uuid
-  []
-  (let [uuids-num (atom 0)]
-    (fn []
-      (java.util.UUID/fromString (format "00000000-0000-0000-0000-%012d" (swap! uuids-num inc))))))
+  ([] (create-uuid 0))
+  ([n]
+   (let [uuids-num (atom n)]
+     (fn []
+       (java.util.UUID/fromString (format "00000000-0000-0000-0000-%012d" (swap! uuids-num inc)))))))
 
 (defn create-time
-  []
-  (let [counter (atom 0)]
-    (fn []
-      (t/>> (t/instant 0) (t/new-duration (swap! counter inc) :seconds)))))
+  ([] (create-time 0))
+  ([n]
+   (let [counter (atom n)]
+     (fn []
+       (t/>> (t/instant 0) (t/new-duration (swap! counter inc) :seconds))))))
 
 (defn- copy-file [src dest]
   (io/copy (io/file src) (io/file dest)))
 
 (defn- copy-dir-recursively
-  ([src-dir dest-dir] (copy-dir-recursively src-dir dest-dir ""))
-  ([src-dir dest-dir ext]
+  ([src-dir dest-dir] (copy-dir-recursively src-dir dest-dir #".*"))
+  ([src-dir dest-dir re]
    (let [src (io/file src-dir)
          dest (io/file dest-dir)]
      (when-not (.exists dest)
@@ -42,8 +44,8 @@
      (doseq [file (.listFiles src)]
        (let [dest-file (io/file dest (.getName file))]
          (if (.isDirectory file)
-           (copy-dir-recursively file dest-file ext)
-           (when (clojure.string/ends-with? file ext)
+           (copy-dir-recursively file dest-file re)
+           (when (re-matches re (.getName file))
              (copy-file file dest-file))))))))
 
 (defn- create-data-query
@@ -69,7 +71,7 @@
        (t/with-clock (-> (t/clock) (t/in "UTC"))
          (try
            (when (-> ~src io/file .isDirectory)
-             (#'datalevin-surge.test-helpers/copy-dir-recursively ~src ~dir ".edn"))
+             (#'datalevin-surge.test-helpers/copy-dir-recursively ~src ~dir #"^[^\.].*\.edn$"))
            (when (some? ~init-kv)
              (let [~'kv (d/open-kv ~uri)]
                (d/open-dbi ~'kv conf/dbi-name)

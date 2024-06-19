@@ -2,26 +2,28 @@
  :parent #uuid "00000000-0000-0000-0000-000000000002"
 
  :up {:stage-fn (fn [conn]
-                  (into {} (d/q '[:find ?p ?a
-                                  :where [?p :person/account ?a]]
-                                (d/db conn))))
+                  (into {} (datalevin.core/q (quote [:find ?p ?a
+                                                     :where [?p :person/account ?a]])
+                                             (datalevin.core/db conn))))
       :schema-remove [:person/account]
       :schema-insert {:person/accounts {:db/valueType :db.type/ref
                                         :db/cardinality :db.cardinality/many}}
 
       :unstage-fn (fn [conn stage]
-                    (d/transact! conn (mapcat (fn [[pid aid]]
-                                                (let [aid-2 (+ 2 aid)
-                                                      amount (d/q '[:find ?am
-                                                                    :where
-                                                                    [aid :account/amount ?am]] (d/db conn))]
-                                                  [{:db/id aid
-                                                    :account/amount 5000.00M}
-                                                   {:db/id aid-2
-                                                    :account/uuid (random-uuid)
-                                                    :account/amount (- amount 5000.00M)}
-                                                   {:db/id pid
-                                                    :person/accounts [aid aid-2]}])) stage)))}
+                    (datalevin.core/transact!
+                     conn
+                     (mapcat (fn [[pid aid]]
+                               (let [aid-2 (+ 2 aid)
+                                     amount (datalevin.core/q '[:find ?am
+                                                                :where
+                                                                [aid :account/amount ?am]] (datalevin.core/db conn))]
+                                 [{:db/id aid
+                                   :account/amount 5000.00M}
+                                  {:db/id aid-2
+                                   :account/uuid (random-uuid)
+                                   :account/amount (- amount 5000.00M)}
+                                  {:db/id pid
+                                   :person/accounts [aid aid-2]}])) stage)))}
 
  :down {:stage-fn (fn [conn]
                     (reduce (fn [acc [pid main-aid aux-aid ams]]

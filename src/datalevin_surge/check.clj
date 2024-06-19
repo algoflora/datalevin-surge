@@ -34,11 +34,6 @@
     (catch Exception ex
       {:ok false :message (str (.getMessage ex) "\t" (ex-data ex))})))
 
-(defn spy
-  [x]
-  (println "SPY" x (type x))
-  x)
-
 (defn local-remote-consistent?
   [pid]
   (let [local  (map :uuid (mgr/sorted-local-migrations))

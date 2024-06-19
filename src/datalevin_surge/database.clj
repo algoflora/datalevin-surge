@@ -24,8 +24,15 @@
 
 (defn write-to-kv
   [pid uuid]
-  (d/open-dbi (kv-connection pid) conf/dbi-name)
-  (d/transact-kv (kv-connection pid) [[:put conf/dbi-name uuid (t/now) :data :data #{:nooverwrite}]]))
+  (when-not (dbi-open? pid)
+    (open-dbi pid))
+  (d/transact-kv (kv-connection pid) [[:put conf/dbi-name uuid (t/now) :data :data #{:nooverwrite :nodupdata}]]))
+
+(defn remove-from-kv
+  [pid uuid]
+  (when-not (dbi-open? pid)
+    (open-dbi pid))
+  (d/transact-kv (kv-connection pid) [[:del conf/dbi-name uuid]]))
 
 (defn read-kv
   [pid]
@@ -41,14 +48,23 @@
   (d/schema (remote-connection pid)))
 
 (defn use!
-  [pid mdata]
+  [pid {:keys [fname muuid mdata]}]
   (declare conn) ; For .clj-kondo calmness...
   (d/with-transaction [conn (remote-connection pid)]
-    (let [stage (some-> mdata :stage-fn (apply [conn]))]
-      (doseq [del-attr (:schema-remove mdata)]
-        (let [es (d/q '[:find [?e ...]
-                        :in $ ?del-attr
-                        :where [?e ?del-attr]] @conn del-attr)]
-          (d/transact! conn (mapv #(vector :db/retract % del-attr) es))))
-      (d/update-schema conn (:schema-insert mdata) (:schema-remove mdata))
-      (some-> mdata :unstage-fn (apply [conn stage])))))
+    (try
+      (let [stage-fn (some-> mdata :stage-fn)
+            unstage-fn (some-> mdata :unstage-fn)
+            stage (apply (eval stage-fn) [conn])]
+        (doseq [del-attr (:schema-remove mdata)]
+          (let [es (d/q '[:find [?e ...]
+                          :in $ ?del-attr
+                          :where [?e ?del-attr]] @conn del-attr)]
+            (d/transact! conn (mapv #(vector :db/retract % del-attr) es))))
+        (d/update-schema conn (:schema-insert mdata) (:schema-remove mdata))
+        (apply (eval unstage-fn) [conn stage]))
+      (catch Exception ex
+        (d/abort-transact conn)
+        (println (format "[ERROR]\tBad Migration %s!\n" fname))
+        (throw ex))))
+  (write-to-kv pid muuid)
+  (println (format "[OK]\tMigration %s successfully applied" fname)))
