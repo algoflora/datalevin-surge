@@ -1,0 +1,63 @@
+{:exp-schema {:person/id {:db/valueType :db.type/long
+                           :db/cardinality :db.cardinality/one
+                           :db/unique :db.unique/identity}
+
+               :person/name {:db/valueType :db.type/string
+                             :db/cardinality :db.cardinality/one}
+
+               :person/amount {:db/valueType :db.type/bigdec
+                               :db/cardinality :db.cardinality/one}}
+
+ :exp-data [{:db/id 1001
+              :person/id 1
+              :person/name "Ivan"
+              :person/amount 10000.00M}
+
+             {:db/id 1002
+              :person/id 2
+              :person/name "Maria"
+              :person/amount 7777.77M}]
+
+ :exp-kv [[#uuid "00000000-0000-0000-0000-000000000001"
+            #time/instant "1970-01-01T00:00:01.000-00:00"]]
+
+ :init-schema {:person/id {:db/valueType :db.type/long
+                          :db/cardinality :db.cardinality/one
+                          :db/unique :db.unique/identity}
+
+              :person/name {:db/valueType :db.type/string
+                            :db/cardinality :db.cardinality/one}
+
+              :person/account {:db/valueType :db.type/ref
+                               :db/cardinality :db.cardinality/one}
+
+              :account/uuid {:db/valueType :db.type/uuid
+                             :db/cardinality :db.cardinality/one
+                             :db/unique :db.unique/identity}
+
+              :account/amount {:db/valueType :db.type/bigdec
+                               :db/cardinality :db.cardinality/one}}
+
+ :init-data [{:db/id 1001
+             :person/id 1
+             :person/name "Ivan"
+             :person/account {:db/id 2001}}
+
+            {:db/id 2001
+             :account/uuid #uuid "00000000-0000-0000-0000-000000000003"
+             :account/amount 10000.00M}
+
+            {:db/id 1002
+             :person/id 2
+             :person/name "Maria"
+             :person/account {:db/id 2002}}
+
+            {:db/id 2002
+             :account/uuid #uuid "00000000-0000-0000-0000-000000000004"
+             :account/amount 7777.77M}]
+
+ :init-kv [[#uuid "00000000-0000-0000-0000-000000000001"
+           #time/instant "1970-01-01T00:00:01.000-00:00"]
+
+          [#uuid "00000000-0000-0000-0000-000000000002"
+           #time/instant "1970-01-01T00:00:02.000-00:00"]]}

@@ -4,7 +4,6 @@
             [datalevin.core :as d]
             [datalevin-surge.config :as conf]
             [datalevin-surge.vars :refer [*project*]]
-            [clojure.string :as s]
             [tick.core :as t]))
 
 (def ^:private opts {:validate-data? true :closed-schema? true})
@@ -50,14 +49,15 @@
 
 (defn- create-data-query
   [schema]
-  `[:find [(~'pull ~'?e [~'*]) ...]
-    :where
-    (~'or ~@(map (fn [a] `[~'?e ~a]) (keys schema)))])
+  (when-not (empty? schema)
+    `[:find [(~'pull ~'?e [~'*]) ...]
+      :where
+      (~'or ~@(map (fn [a] `[~'?e ~a]) (keys schema)))]))
 
 (defmacro with-test-case
   [test-case & body]
   (require '[datalevin-surge.clear])
-  (let [{:keys [init-kv init-schema init-data exp-kv exp-schema exp-data] :as data}
+  (let [{:keys [init-kv init-schema init-data exp-kv exp-schema exp-data]}
         (->> (name test-case)
              (format "%s/data.edn")
              io/resource slurp read-string)
@@ -95,7 +95,7 @@
                (when (some? ~exp-schema)
                  (is (= ~exp-schema ~'schema)))
                (when (some? ~exp-data)
-                 (is (= (set ~exp-data) (set (d/q ~'query (d/db ~'conn)))))))
+                 (is (= (set ~exp-data) (if ~'query (set (d/q ~'query (d/db ~'conn))) #{})))))
              (when (some? ~exp-kv)
                (let [~'kv-conn (d/open-kv ~uri)]
                  (try

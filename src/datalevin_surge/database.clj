@@ -48,23 +48,23 @@
   (d/schema (remote-connection pid)))
 
 (defn use!
-  [pid {:keys [fname muuid mdata]}]
+  [pid {:keys [fname mdata]}]
   (declare conn) ; For .clj-kondo calmness...
   (d/with-transaction [conn (remote-connection pid)]
     (try
       (let [stage-fn (some-> mdata :stage-fn)
             unstage-fn (some-> mdata :unstage-fn)
-            stage (apply (eval stage-fn) [conn])]
+            stage (when stage-fn
+                    (apply (eval stage-fn) [conn]))]
         (doseq [del-attr (:schema-remove mdata)]
           (let [es (d/q '[:find [?e ...]
                           :in $ ?del-attr
                           :where [?e ?del-attr]] @conn del-attr)]
             (d/transact! conn (mapv #(vector :db/retract % del-attr) es))))
         (d/update-schema conn (:schema-insert mdata) (:schema-remove mdata))
-        (apply (eval unstage-fn) [conn stage]))
+        (when unstage-fn
+          (apply (eval unstage-fn) [conn stage])))
       (catch Exception ex
         (d/abort-transact conn)
         (println (format "[ERROR]\tBad Migration %s!\n" fname))
-        (throw ex))))
-  (write-to-kv pid muuid)
-  (println (format "[OK]\tMigration %s successfully applied" fname)))
+        (throw ex)))))

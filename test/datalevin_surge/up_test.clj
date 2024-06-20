@@ -15,7 +15,7 @@
     (with-redefs [ask-approve! approve!
                   random-uuid (create-uuid)
                   t/now (create-time)]
-      (is (= "All up migrations are completed!\n"
+      (is (= "All up migrations are applied!\n"
              (with-out-str
                (migr/up *pid* :all))))))
 

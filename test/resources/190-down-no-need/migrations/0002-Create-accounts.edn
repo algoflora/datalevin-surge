@@ -1,0 +1,38 @@
+{:uuid #uuid "00000000-0000-0000-0000-000000000002"
+ :parent #uuid "00000000-0000-0000-0000-000000000001"
+
+ :up {:stage-fn (fn [conn]
+                  (into {} (d/q '[:find ?p ?amount
+                                  :where [?p :person/amount ?amount]]
+                                (d/db conn))))
+      :schema-remove [:person/amount]
+      :schema-insert {:person/account {:db/valueType :db.type/ref
+                                       :db/cardinality :db.cardinality/one}
+
+                      :account/uuid {:db/valueType :db.type/uuid
+                                     :db/cardinality :db.cardinality/one
+                                     :db/unique :db.unique/identity}
+
+                      :account/amount {:db/valueType :db.type/bigdec
+                                       :db/cardinality :db.cardinality/one}}
+
+      :unstage-fn (fn [conn stage]
+                    (d/transact! conn (mapcat (fn [[pid am]]
+                                                (let [aid (+ 1000 pid)]
+                                                  [{:db/id aid
+                                                    :account/uuid (random-uuid)
+                                                    :account/amount am}
+                                                   {:db/id pid
+                                                    :person/account aid}]))) stage))}
+ :down {:stage-fn (fn [conn]
+                    (into {} (d/q '[:find ?p ?amount
+                                    :where
+                                    [?p :person/account ?acc]
+                                    [?acc :account/amount ?amount]] (d/db conn))))
+        :schema-remove [:person/acount :account/uuid :account/amount]
+        :schema-insert {:person/amount {:db/valueType :db.type/bigdec
+                                        :db/cardinality :db.cardinality/one}}
+        :unstage-fn (fn [conn stage]
+                      (d/transact! conn (mapv (fn [[pid am]]
+                                                {:db/id pid
+                                                 :person/amount am}))))}}

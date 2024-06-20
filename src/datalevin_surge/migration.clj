@@ -105,7 +105,7 @@
         remote (->> (db/read-kv pid) (into []) (sort-by second))]
     (cond
       (= (count local) (count remote))
-      (println "All up migrations are completed!")
+      (println "All up migrations are applied!")
 
       :else
       (let [migs (take (if (= :all num) Long/MAX_VALUE num) (drop (count remote) local))]
@@ -113,7 +113,28 @@
           (try
             (doseq [mig migs]
               (db/use! pid {:fname (:filename mig)
-                            :muuid (:uuid mig)
-                            :mdata (:up mig)}))
+                            :mdata (:up mig)})
+              (db/write-to-kv pid (:uuid mig))
+              (println (format "[OK]\tMigration %s successfully applied" (:filename mig))))
+            (catch Exception ex
+              (println (.getMessage ex)))))))))
+
+(defn down
+  [pid num]
+  (let [local  (sorted-local-migrations)
+        remote (->> (db/read-kv pid) (into []) (sort-by second))]
+    (cond
+      (zero? (count remote))
+      (println "No migrations to revert!")
+
+      :else
+      (let [migs (take (if (= :all num) Long/MAX_VALUE num) (reverse (take (count remote) local)))]
+        (when (misc/ask-approve! (format "Do you want to revert %d migration(s)? (y/n) " (count migs)))
+          (try
+            (doseq [mig migs]
+              (db/use! pid {:fname (:filename mig)
+                            :mdata (:down mig)})
+              (db/remove-from-kv pid (:uuid mig))
+              (println (format "[OK]\tMigration %s successfully reverted" (:filename mig))))
             (catch Exception ex
               (println (.getMessage ex)))))))))
