@@ -56,8 +56,24 @@
         path     (format "%s/%s" (conf/migrations-dir) filename)
         uuid     (random-uuid)]
     (spit path (compose-initial pid uuid))
-    (println (format "\"%s\" migration created in file %s" initial-migration-name path))
+    (println (format "[OK]\t\"%s\" migration created in file %s" initial-migration-name path))
     uuid))
+
+(defn- compose-new
+  [uuid parent name]
+  (let [bindings {:migration-name name
+                  :project-name   (:name *project*)
+                  :created-on     (date-str)
+                  :uuid           uuid
+                  :parent         parent}]
+    (template/eval (io/resource "new-migration.comb") bindings)))
+
+(defn create-new
+  [num parent name]
+  (let [filename (create-filename num name)
+        path     (format "%s/%s" (conf/migrations-dir) filename)]
+    (spit path (compose-new (random-uuid) parent name))
+    (println (format "[OK]\t\"%s\" migration created in file %s" name path))))
 
 (defn sort-migrations
   [migrations]

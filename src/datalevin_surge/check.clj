@@ -72,6 +72,13 @@
               #(local-consistent?)
               #(local-remote-consistent? pid)))
 
-(defn main
-  [pid]
-  (process pid true))
+(defn with-check
+  [pid f]
+  (let [result (check-flow false
+                           #(remote-init? pid)
+                           #(local-init?)
+                           #(local-consistent?)
+                           #(local-remote-consistent? pid))]
+    (if (:ok result)
+      (f)
+      (println (->> result :messages last (str "[ERROR]\t"))))))

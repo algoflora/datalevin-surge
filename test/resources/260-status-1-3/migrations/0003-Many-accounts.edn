@@ -1,0 +1,48 @@
+{:uuid #uuid "00000000-0000-0000-0000-000000000003"
+ :parent #uuid "00000000-0000-0000-0000-000000000002"
+
+ :up {:stage-fn (fn [conn]
+                  (into {} (datalevin.core/q (quote [:find ?p ?a
+                                                     :where [?p :person/account ?a]])
+                                             (datalevin.core/db conn))))
+      :schema-remove [:person/account]
+      :schema-insert {:person/accounts {:db/valueType :db.type/ref
+                                        :db/cardinality :db.cardinality/many}}
+
+      :unstage-fn (fn [conn stage]
+                    (datalevin.core/transact!
+                     conn
+                     (mapcat (fn [[pid aid]]
+                               (let [aid-2 (+ 2 aid)
+                                     amount (datalevin.core/q (quote [:find ?am .
+                                                                      :in $ ?aid
+                                                                      :where
+                                                                      [?aid :account/amount ?am]]) (datalevin.core/db conn) aid)]
+                                 [{:db/id aid
+                                   :account/amount 5000.00M}
+                                  {:db/id aid-2
+                                   :account/uuid (random-uuid)
+                                   :account/amount (- amount 5000.00M)}
+                                  {:db/id pid
+                                   :person/accounts [aid aid-2]}])) stage)))}
+
+ :down {:stage-fn (fn [conn]
+                    (reduce (fn [acc [pid main-aid aux-aid ams]]
+                              (assoc acc :pid {:main-account main-aid
+                                               :aux-account aux-aid
+                                               :amount (+ ams)}))
+                            {}
+                            (d/q '[:find ?p ?main-aid ?aux-aid ?ams
+                                    :where
+                                    [?p :person/account ?acc]
+                                    [?acc :account/amount ?amount]] (d/db conn))))
+        :schema-remove [:person/acounts]
+        :schema-insert {:person/acount {:db/valueType :db.type/ref
+                                        :db/cardinality :db.cardinality/one}}
+        :unstage-fn (fn [conn stage]
+                      (d/transact! conn (mapcat (fn [[pid {:keys [main-aid aux-aid am]}]]
+                                                  [[:db/retractEntity aux-aid]
+                                                   {:db/id pid
+                                                    :person/account main-aid}
+                                                   {:db/id main-aid
+                                                    :account/amount am}]))))}}

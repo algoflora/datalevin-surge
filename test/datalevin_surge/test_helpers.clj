@@ -2,8 +2,8 @@
   (:require [clojure.java.io :as io]
             [clojure.test :refer [is deftest]]
             [datalevin.core :as d]
+            [datalevin-surge.misc :as misc]
             [datalevin-surge.config :as conf]
-            [datalevin-surge.vars :refer [*project*]]
             [tick.core :as t]))
 
 (def ^:private opts {:validate-data? true :closed-schema? true})
@@ -56,7 +56,7 @@
 
 (defmacro with-test-case
   [test-case & body]
-  (require '[datalevin-surge.clear])
+  (require '[datalevin-surge.misc])
   (let [{:keys [init-kv init-schema init-data exp-kv exp-schema exp-data]}
         (->> (name test-case)
              (format "%s/data.edn")
@@ -102,9 +102,5 @@
                    (d/open-dbi ~'kv-conn conf/dbi-name)
                    (is (= ~exp-kv (d/get-range ~'kv-conn conf/dbi-name [:all] :data :data)))
                    (finally (d/close-kv ~'kv-conn))))))
-           (finally (#'datalevin-surge.clear/del-dir-rec (io/file ~uri))
-                    (#'datalevin-surge.clear/del-dir-rec (io/file ~dir))))))))
-
-(defn test-uri
-  []
-  (-> *project* :datalevin-surge :profiles :test))
+           (finally (datalevin-surge.misc/del-dir-rec (io/file ~uri))
+                    (datalevin-surge.misc/del-dir-rec (io/file ~dir))))))))

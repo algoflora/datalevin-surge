@@ -6,6 +6,7 @@
             [tick.core :as t]
             [datalevin-surge.misc :refer [ask-approve!]]
             [datalevin-surge.init :as init]
+            [datalevin-surge.profile :as prof]
             [datalevin-surge.database :as db]
             [datalevin-surge.test-helpers :refer [with-test-case
                                                   *pid*
@@ -45,8 +46,9 @@
                         (str/split-lines
                          (with-out-str
                            (init/process *pid*)))
-                        ["Do you want to initialise Datalevin Surge migration tool in current folder and database"])]
-          (is (str/starts-with? (:act m) (:exp m))))
+                        [(format "Do you want to initialise Datalevin Surge migration tool in current folder and database '%s'? (y/n): " (prof/profile-uri *pid*))
+                         (format "[OK]\t\"Initial migration\" migration created in file %s/0000-initial-migration.edn" *dir*)])]
+          (is (= (:exp m) (:act m))))
         (is (true? (db/dbi-open? *pid*)))
         (let [mgs  (filter #(not (.isDirectory %)) (file-seq *dir*))
               cnt  (count mgs)
