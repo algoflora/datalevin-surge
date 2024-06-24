@@ -33,7 +33,3 @@
       (when (ask-approve! (format "Do you want to initialise Datalevin Surge migration tool in current folder and database '%s'? (y/n): " (profile-uri pid)))
         (init-remote pid)
         (init-local pid)))))
-
-(defn main
-  [pid]
-  (process pid))

@@ -63,10 +63,11 @@
     :else (println "[ERROR]\t'new' command accepts only one optional migration name argument!")))
 
 (defn -main
-  [args]
+  [& args]
   (let [profile   (first args)
         command   (second args)
         arguments (drop 2 args)]
+    (println "PROJECT" *project*)
     (if (some (-> *project* :datalevin-surge :profiles keys set) [profile])
       (process command profile arguments)
-      (println (format "[ERROR]\tWrong profile '%d'!" profile)))))
+      (println (format "[ERROR]\tWrong profile '%s'!" profile)))))

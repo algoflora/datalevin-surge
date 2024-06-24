@@ -1,4 +1,4 @@
-(defproject io.github.algoflora/datalevin-surge "0.1.0"
+(defproject io.github.algoflora/datalevin-surge "0.1.1"
   :description "Datalevin database migrations plugin for Leiningen"
   :url "https://github.com/datalevin-surge"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"

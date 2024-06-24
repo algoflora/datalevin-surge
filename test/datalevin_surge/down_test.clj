@@ -5,7 +5,6 @@
             [datalevin-surge.migration :as migr]
             [datalevin-surge.test-helpers :refer [with-test-case
                                                   *pid*
-                                                  *dir*
                                                   approve!
                                                   create-uuid
                                                   create-time]]))
