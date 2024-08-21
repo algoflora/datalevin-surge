@@ -142,6 +142,10 @@ This is the example with comments of migration file created by `new` command:
 
 _TODO: add the ability to use side namespaces_
 
+## Development
+
+Contributors are welcome! You can check current todos on [Issues page](https://github.com/algoflora/datalevin-surge/issues) or add your own.
+
 ## License
 
 Copyright © 2024 FIXME
