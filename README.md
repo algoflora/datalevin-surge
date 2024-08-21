@@ -10,7 +10,7 @@ _These instructions are for Leiningen projects._
 
 _TODO: add ability to use this tool with **Clojure CLI** and **Babashka**_
 
-❗ This tool always using connection with `:validate-data>` and `:closed-schema?` options switched to `true`. If you are using different options it may cause unexpected effects in some cases.
+❗ This tool always using connection with `:validate-data?` and `:closed-schema?` options switched to `true`. If you are using different options it may cause unexpected effects in some cases.
 
 ### Setup
 
