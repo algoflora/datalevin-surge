@@ -1,5 +1,7 @@
 # datalevin-surge
 
+[![Clojars Project](https://img.shields.io/clojars/v/io.github.algoflora/datalevin-surge.svg)](https://clojars.org/io.github.algoflora/datalevin-surge)
+
 Utility for seamless migrations of Datalevin databases in Leiningen projects.
 
 ## Usage
