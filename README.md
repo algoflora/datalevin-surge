@@ -14,7 +14,11 @@ _TODO: add ability to use this tool with **Clojure CLI** and **Babashka**_
 
 ### Setup
 
-Add to your `project.clj` something like this:
+Add dependency to your `project.clj`:
+
+```[io.github.algoflora/datalevin-surge "0.1.2"]```
+
+And something like this:
 
 ```clojure
 :aliases {"surge" ["run" "-m" "datalevin-surge.core"]}
